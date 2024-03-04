@@ -9,9 +9,27 @@
         <a href="/detail/<%= 글목록[i]._id %>"> <%= 글목록[i].title %> </a>
       </h4>
       <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
+      <span class="delete" data-id="<%= 글목록[i]._id %>">🗑️</span>
+      <!-- 삭제버튼을 누르면
+      서버에 삭제요청을 하고
+      서버에서 삭제한다. -->
 
       <p><%= 글목록[i].content %></p>
     </div>
     <% } %>
   </div>
 </body>
+
+<script>
+  document
+    .querySelectorAll(".delete")[0]
+    .addEventListener("click", function (e) {
+      fetch("/delete?docid=" + e.target.dataset.id, {
+        method: "DELETE",
+      })
+        .then((r) => r.text())
+        .then((r) => {
+          e.target.parentElement.parentElement.style.display = "none";
+        });
+    });
+</script>
