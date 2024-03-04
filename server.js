@@ -82,5 +82,11 @@ app.post('/edit', async(요청, 응답)=>{
 console.log(요청.body)
 })
 
+app.delete("/delete",async(요청,응답)=>{
+console.log(요청.query);
+let result = await db.collection("post").deleteOne({ _id : new ObjectId(요청.query.docid)})
+응답.send("삭제완료")
+})
+
 
 
