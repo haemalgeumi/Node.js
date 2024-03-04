@@ -89,4 +89,11 @@ let result = await db.collection("post").deleteOne({ _id : new ObjectId(요청.q
 })
 
 
+app.get('/list/:id', async(요청, 응답)=>{
+  let result = await db.collection('post').find().skip((요청.params.id -1)* 5).limit(5).toArray()
+  응답.render('list.ejs', {글목록 : result})
+})
+
+
+
 
