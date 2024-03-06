@@ -1,6 +1,11 @@
 const express = require('express')
 const app = express()
 const { MongoClient , ObjectId } = require('mongodb')
+const session = require('express-session')
+const passport = require('passport')
+const LocalStrategy = require('passport-local')
+const bcrypt = require('bcrypt') 
+const MongoStore = require('connect-mongo')
 
 let db
 const url = 'mongodb+srv://admin:qwer1234@cluster0.pkaqcij.mongodb.net/?retryWrites=true&w=majority'
@@ -20,6 +25,42 @@ app.set('view engine','ejs')
 app.use(express.static(__dirname + '/public'));
 app.use(express.json())
 app.use(express.urlencoded({extended:true})) 
+app.use(passport.initialize())
+app.use(session({
+  secret: '2266',
+  resave : false,
+  saveUninitialized : false,
+  cookie : { maxAge : 60 * 60 * 1000 },
+  store: MongoStore.create({
+    mongoUrl : 'mongodb+srv://admin:qwer1234@cluster0.pkaqcij.mongodb.net/?retryWrites=true&w=majority',
+    dbName: 'forum',
+  })
+}))
+
+app.use(passport.session()) 
+
+passport.use(new LocalStrategy(async (입력한아이디, 입력한비번, cb) => {
+  let result = await db.collection('member').findOne({ username : 입력한아이디})
+  if (!result) {
+    return cb(null, false, { message: '아이디 DB에 없음' })
+  }
+  if (await bcrypt.compare(입력한비번, result.password)) {
+    return cb(null, result)
+  } else {
+    return cb(null, false, { message: '비번불일치' });
+  }
+}))
+
+passport.serializeUser((user, done) => {
+  process.nextTick(() => {
+    done(null, { id: user._id, username: user.username })
+  })
+})
+passport.deserializeUser((user, done) => {
+  process.nextTick(() => {
+    return done(null, user)
+  })
+})
 
 
 app.get('/', (요청, 응답) => {
@@ -92,6 +133,47 @@ let result = await db.collection("post").deleteOne({ _id : new ObjectId(요청.q
 app.get('/list/:id', async(요청, 응답)=>{
   let result = await db.collection('post').find().skip((요청.params.id -1)* 5).limit(5).toArray()
   응답.render('list.ejs', {글목록 : result})
+})
+
+
+app.get('/signup', async(요청, 응답)=>{
+  응답.render('signup.ejs')
+})
+
+app.post('/member', async(요청, 응답)=>{
+  try{
+   if(요청.body.username === '' || 요청.body.password === ''){
+     응답.send('빈칸을 입력하시오')
+   } else{
+    let 해시 = await bcrypt.hash(요청.body.password, 10) 
+     await db.collection('member').insertOne({username: 요청.body.username, password: 해시})
+     console.log(요청.body.username);
+     응답.redirect("/")
+   }
+  } catch{
+   응답.send('서버 에러났어요')
+  }
+ 
+ })
+
+ app.get('/login', async(요청, 응답)=>{
+  응답.render('login.ejs')
+})
+
+app.post('/login', async (요청, 응답, next) => {
+  passport.authenticate('local', (error, user, info) => {
+      if (error) return 응답.status(500).json(error)
+      if (!user) return 응답.status(401).json(info.message)
+      요청.logIn(user, (err) => {
+        if (err) return next(err)
+        응답.redirect('/')
+      })
+  })(요청, 응답, next)
+})
+
+app.get('/mypage', async(요청, 응답)=>{
+    응답.render('mypage.ejs',{user : 요청.user})
+    console.log(요청.user)
 })
 
 
