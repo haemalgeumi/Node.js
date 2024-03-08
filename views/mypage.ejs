@@ -1,0 +1,11 @@
+<link href="/write.css" rel="stylesheet" />
+<%= JSON.stringify(user) %>
+<h4>마이 페이지</h4>
+<input name="username" value="<%= user.username %>" />
+<input name="password" type="password" />
+
+<!-- 
+조건 1. 마이페이지는 로그인 한 사람만 방문할 수 있고
+
+조건 2. 마이페이지 레이아웃은 아무렇게나 만드는데 
+현재 로그인된 유저의 아이디가 어딘가 표기되어있어야합니다.  -->
