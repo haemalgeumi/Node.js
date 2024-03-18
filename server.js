@@ -202,5 +202,21 @@ app.get('/mypage', async(요청, 응답)=>{
 })
 
 
+// app.get('/search', async (요청, 응답) => {
+//   let result = await db.collection('post').find( {title : 요청.query.val} ).toArray()
+//   응답.render('search.ejs', { 글목록 : result })
+// }) 
+app.get('/search', async (요청, 응답)=>{
+  let result = await db.collection('post').find({title : {$regex : 요청.query.val} }).toArray()
+  응답.render('search.ejs', {글목록 : result})
+}) 
+
+
+
+
+
+
+
+
 
 

@@ -3,7 +3,7 @@
 <%= JSON.stringify(글목록) %> <%- include('nav.ejs') -%>
 <body class="grey-bg">
   <div class="input-group">
-    <input class="inputVal" />
+    <input type="text" class="inputVal" />
     <span class="searchBtn">검색</span>
   </div>
   <div class="white-bg">
@@ -14,37 +14,15 @@
       </h4>
       <a href="/edit/<%= 글목록[i]._id %>">✏️</a>
       <span class="delete" data-id="<%= 글목록[i]._id %>">🗑️</span>
-      <!-- 삭제버튼을 누르면
-      서버에 삭제요청을 하고
-      서버에서 삭제한다. -->
 
       <p><%= 글목록[i].content %></p>
     </div>
     <% } %>
   </div>
-  <div>
+  <!-- <div>
     <a href="/list/1">1</a>
     <a href="/list/2">2</a>
     <a href="/list/3">3</a>
     <a href="/list/4">4</a>
-  </div>
+  </div> -->
 </body>
-
-<script>
-  document
-    .querySelectorAll(".delete")[0]
-    .addEventListener("click", function (e) {
-      fetch("/delete?docid=" + e.target.dataset.id, {
-        method: "DELETE",
-      })
-        .then((r) => r.text())
-        .then((r) => {
-          e.target.parentElement.parentElement.style.display = "none";
-        });
-    });
-
-  document.querySelector(".searchBtn").addEventListener("click", function () {
-    let inputValue = document.querySelector(".inputVal").value;
-    location.href = "/search?val=" + inputValue;
-  });
-</script>
